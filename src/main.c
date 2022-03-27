@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include "config.h"
 
 extern int errno;
 extern int randint(int upper, int lower);
@@ -48,6 +49,11 @@ If an optional argument is given none of the mandatory arguments are allowed\n")
         exit(0);
     }
 
+    // Check if all 2 mandatory arguments are given
+    /*
+        It is checking this after all of the other errors because it had
+        to check for single optional arguments
+    */
     if (argc < 3){
         // EINVAL 22 Invalid argument
         errno = 22;
@@ -62,12 +68,24 @@ If an optional argument is given none of the mandatory arguments are allowed\n")
         errno = 22;
         perror("passwdgen");
         exit(errno);
+    // len_cap is defined in config.h
+    } if (*len >= len_cap){
+        // EOVERFLOW 75 Value too large for defined data type
+        errno = 75;
+        perror("passwdgen");
+        exit(errno);
     }
     // AMNT - password amount
     *amount = atoi(argv[2]);
     if (*amount == 0){
         // EINVAL 22 Invalid argument
         errno = 22;
+        perror("passwdgen");
+        exit(errno);
+    // amount_cap is defined in config.h
+    } if (*amount >= amount_cap){
+        // EOVERFLOW 75 Value too large for defined data type
+        errno = 75;
         perror("passwdgen");
         exit(errno);
     }
@@ -82,9 +100,7 @@ int main(int argc, char *argv[]){
     // Collect user input
     input_handler(argc, argv, &len, &amount);
 
-    // Define all usable characters
-    const char *characters;
-    characters="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!\"#$%&/()=?*+<>,;.:-_@[]{}";
+    // Use const char *characters from config.h
     int charter_array_len = strlen(characters);
 
     // Repeat for the amount of passwords
