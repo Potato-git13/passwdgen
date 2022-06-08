@@ -1,11 +1,13 @@
-CFLAGS=-g -Wall -Wextra -pedantic -Wformat=2 -Wextra
-c:
+CFLAGS=-Wall -Wextra -pedantic -Wformat=2 -Wextra
+compile:
 	mkdir -p bin/
 	gcc -o bin/passwdgen src/main.c $(CFLAGS)
-r:
+compile-debug: CFLAGS += -g
+compile-debug: compile
+
+run:
 	bin/passwdgen
-install: c
+install:
 	sudo cp bin/passwdgen /usr/bin/
 uninstall:
 	sudo rm bin/passwdgen
-cr:c r
