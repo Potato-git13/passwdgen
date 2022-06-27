@@ -5,7 +5,7 @@ Generate a set amount of random passwords of set length
 ```
 git clone https://github.com/Potato-git13/passwdgen
 cd passwdgen/
-make c
+make compile
 ```
 # USAGE
 For info on how to use it type: ```passwdgen -h```
