@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include <time.h>
 #include "config.h"
-
-extern int errno;
 
 typedef enum {true, false} bool;
 
@@ -14,21 +11,15 @@ typedef enum {true, false} bool;
 void input_handler(int argc, char *argv[], int *len, int *amount, bool *outfile, int *outfile_location){
     // Error handeling
     if (argc > 5){
-        // E2BIG 7 Argumgent list too long
-        errno = 7;
-        perror("passwdgen");
-        exit(errno);
+        fprintf(stderr, "passwdgen: Too many arguments\n");
+        exit(EXIT_FAILURE);
     // I'm very sorry future me for this:
-} else if ((argc >= 3)&& ((!strcmp(argv[1], "-h") || !strcmp(argv[2], "-h") || (!strcmp(argv[1], "-v") || !strcmp(argv[2], "-v"))))){
-        // EINVAL 22 Invalid argument
-        errno = 22;
-        perror("passwdgen");
-        exit(errno);
+    } else if ((argc >= 3) && ((!strcmp(argv[1], "-h") || !strcmp(argv[2], "-h") || (!strcmp(argv[1], "-v") || !strcmp(argv[2], "-v"))))){
+        fprintf(stderr, "passwdgen: Invalid argument\n");
+        exit(EXIT_FAILURE);
     } else if (argc == 1){
-        // EINVAL 22 Invalid argument
-        errno = 22;
-        perror("passwdgen");
-        exit(errno);
+        fprintf(stderr, "passwdgen: Not enough arguments\n");
+        exit(EXIT_FAILURE);
     }
 
     // Optional args
@@ -37,19 +28,17 @@ void input_handler(int argc, char *argv[], int *len, int *amount, bool *outfile,
 Usage: passwdgen LEN AMNT <option>\n\
 \n\
 Mandatory arguments:\n\
-  LEN       the length of the password(s) that will be generated\n\
-  AMNT      the amount of password to be generated\n\
+\tLEN\tthe length of the password(s) that will be generated\n\
+\tAMNT\tthe amount of password to be generated\n\
 \n\
 Optional arguments:\n\
-  -h        print this message and exit\n\
-  -v        print the passwdgen version number and exit\n\
-  -of       writes the passwords to a file\n\
-\n\
-If -h or -v are given the mandatory arguments are not allowed\n");
-        exit(0);
+\t-h\tprint this message and exit\n\
+\t-v\tprint the passwdgen version number and exit\n\
+\t-of\twrites the passwords to a file\n");
+        exit(EXIT_SUCCESS);
     } else if(!strcmp(argv[1], "-v")){
         printf("passwdgen %s\n", VERSION);
-        exit(0);
+        exit(EXIT_SUCCESS);
     }
 
     // Check if all 2 mandatory arguments are given
@@ -58,44 +47,34 @@ If -h or -v are given the mandatory arguments are not allowed\n");
         to check for single optional arguments
     */
     if (argc < 3){
-        // EINVAL 22 Invalid argument
-        errno = 22;
-        perror("passwdgen");
-        exit(errno);
+        fprintf(stderr, "passwdgen: Not enough arguments\n");
+        exit(EXIT_FAILURE);
     }
     // Mandatory args
     // LEN - password length
     *len = atoi(argv[1]);
     if (*len == 0){
-        // EINVAL 22 Invalid argument
-        errno = 22;
-        perror("passwdgen");
-        exit(errno);
+        fprintf(stderr, "passwdgen: Password length invalid\n");
+        exit(EXIT_FAILURE);
     // len_cap is defined in config.h
     } if (*len >= len_cap){
-        // EOVERFLOW 75 Value too large for defined data type
-        errno = 75;
-        perror("passwdgen");
-        exit(errno);
+        fprintf(stderr, "passwdgen: Password length too large\n");
+        exit(EXIT_FAILURE);
     }
     // AMNT - password amount
     *amount = atoi(argv[2]);
     if (*amount == 0){
-        // EINVAL 22 Invalid argument
-        errno = 22;
-        perror("passwdgen");
-        exit(errno);
+        fprintf(stderr, "passwdgen: Password amount invalid\n");
+        exit(EXIT_FAILURE);
     // amount_cap is defined in config.h
     } if (*amount >= amount_cap){
-        // EOVERFLOW 75 Value too large for defined data type
-        errno = 75;
-        perror("passwdgen");
-        exit(errno);
+        fprintf(stderr, "passwdgen: Password amount too large\n");
+        exit(EXIT_FAILURE);
     }
 
+    // Out file
     if (argc == 5){
-        int i;
-        for (i=0;i<argc;i++){
+        for (int i=0; i<argc; i++){
             if (!strcmp(argv[i], "-of")){
                 *outfile_location = i+1;
                 *outfile = true;
