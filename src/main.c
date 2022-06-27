@@ -8,13 +8,13 @@ typedef enum {true, false} bool;
 
 #define VERSION "0.1"
 
-void input_handler(int argc, char *argv[], int *len, int *amount, bool *outfile, int *outfile_location){
+void input_handler(int argc, char *argv[], int *len, int *amount, bool *outfile, int *outfile_location, bool *special){
     // Error handeling
-    if (argc > 5){
+    if (argc > 6){
         fprintf(stderr, "passwdgen: Too many arguments\n");
         exit(EXIT_FAILURE);
     // I'm very sorry future me for this:
-    } else if ((argc >= 3) && ((!strcmp(argv[1], "-h") || !strcmp(argv[2], "-h") || (!strcmp(argv[1], "-v") || !strcmp(argv[2], "-v"))))){
+    } else if ((argc >= 3) && (!strcmp(argv[1], "-h") || !strcmp(argv[2], "-h") || !strcmp(argv[1], "-v") || !strcmp(argv[2], "-v"))){
         fprintf(stderr, "passwdgen: Invalid argument\n");
         exit(EXIT_FAILURE);
     } else if (argc == 1){
@@ -34,7 +34,8 @@ Mandatory arguments:\n\
 Optional arguments:\n\
 \t-h\tprint this message and exit\n\
 \t-v\tprint the passwdgen version number and exit\n\
-\t-of\twrites the passwords to a file\n");
+\t-of\twrites the passwords to a file\n\
+\t-s\ttoggles special characters\n");
         exit(EXIT_SUCCESS);
     } else if(!strcmp(argv[1], "-v")){
         printf("passwdgen %s\n", VERSION);
@@ -73,11 +74,21 @@ Optional arguments:\n\
     }
 
     // Out file
-    if (argc == 5){
+    if (argc >= 5){
         for (int i=0; i<argc; i++){
             if (!strcmp(argv[i], "-of")){
                 *outfile_location = i+1;
                 *outfile = true;
+                break;
+            }
+        }
+    }
+
+    // Special characters
+    if (argc >= 4){
+        for (int i=0; i<argc; i++){
+            if (!strcmp(argv[i], "-s")){
+                *special = true;
                 break;
             }
         }
@@ -91,11 +102,19 @@ int main(int argc, char *argv[]){
     int counter2;
     bool outfile = false;
     int outfile_location;
+    bool special = false;
 
     // Collect user input
-    input_handler(argc, argv, &len, &amount, &outfile, &outfile_location);
-    // Use const char *characters from config.h
-    int charter_array_len = strlen(characters);
+    input_handler(argc, argv, &len, &amount, &outfile, &outfile_location, &special);
+    
+    int charter_array_len = 0;
+
+    // Special characters
+    if (special == true){
+        charter_array_len = strlen(special_characters);
+    } else {
+        charter_array_len = strlen(characters);
+    }
 
     if (outfile == true){
         // Open a file for writing
@@ -111,7 +130,11 @@ int main(int argc, char *argv[]){
                 int randint;
                 randint = rand() % charter_array_len;
                 // Instead of writing it to stdout write it to a file
-                fprintf(fp, "%c", characters[randint]);
+                if (special == true){
+                    fprintf(fp, "%c", special_characters[randint]);
+                } else {
+                    fprintf(fp, "%c", characters[randint]);
+                }
             }
             fprintf(fp, "\n");
         }
@@ -124,7 +147,11 @@ int main(int argc, char *argv[]){
                 // Grab a random character from the characters array
                 int randint;
                 randint = rand() % charter_array_len;
-                printf("%c", characters[randint]);
+                if (special == true){
+                    printf("%c", special_characters[randint]);
+                } else {
+                    printf("%c", characters[randint]);
+                }
             }
             printf("\n");
         }
